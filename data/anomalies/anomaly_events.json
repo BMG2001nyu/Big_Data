@@ -1,0 +1,40 @@
+{
+  "record_count": 50,
+  "output": "data/anomalies/anomaly_events.parquet",
+  "borough_breakdown": {
+    "BRONX": 40,
+    "QUEENS": 10
+  },
+  "top_severity": [
+    {
+      "from_hour": "2008-04-28 17:00:00",
+      "borough": "BRONX",
+      "roadwayname": "E/B EASTERN BLVD BRIDGE@BRONX RIVER AVE",
+      "anomaly_severity": 0.0431244074935514
+    },
+    {
+      "from_hour": "2008-04-28 16:00:00",
+      "borough": "BRONX",
+      "roadwayname": "E/B EASTERN BLVD BRIDGE@BRONX RIVER AVE",
+      "anomaly_severity": 0.04205197240726921
+    },
+    {
+      "from_hour": "2008-04-25 16:00:00",
+      "borough": "BRONX",
+      "roadwayname": "E/B EASTERN BLVD BRIDGE@BRONX RIVER AVE",
+      "anomaly_severity": 0.04008960651433524
+    },
+    {
+      "from_hour": "2008-04-28 15:00:00",
+      "borough": "BRONX",
+      "roadwayname": "E/B EASTERN BLVD BRIDGE@BRONX RIVER AVE",
+      "anomaly_severity": 0.039733335458014385
+    },
+    {
+      "from_hour": "2023-03-29 18:30:00",
+      "borough": "BRONX",
+      "roadwayname": "CROSS BRONX EXPRESSWAY",
+      "anomaly_severity": 0.037066418652542565
+    }
+  ]
+}

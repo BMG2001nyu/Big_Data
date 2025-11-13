@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+*.egg-info/
+dist/
+build/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Vite
+dashboard/dist/
+dashboard/.vite/
+
+# Data (optional - uncomment if you don't want to commit data files)
+# data/raw/
+# data/processed/
+# data/anomalies/
+# data/stream/
+
+# Models (optional - uncomment if models are too large)
+# models/*.pkl
+# models/*.joblib
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
+
+# Spark
+spark-warehouse/
+metastore_db/
+derby.log
+

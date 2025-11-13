@@ -1,0 +1,19 @@
+# Storage configuration for NYC traffic analytics pipeline
+storage:
+  default: hdfs
+  hdfs:
+    namenode: hdfs://localhost:9000
+    raw_path: /data/nyc_traffic/raw
+    processed_path: /data/nyc_traffic/processed
+    checkpoint_path: /data/nyc_traffic/checkpoints
+  local:
+    base_path: data
+    raw_path: data/raw
+    processed_path: data/processed
+    intermediate_path: data/intermediate
+  cloud:
+    provider: aws
+    s3_bucket: nyc-traffic-analytics
+    raw_prefix: raw/
+    processed_prefix: processed/
+    region: us-east-1

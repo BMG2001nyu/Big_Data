@@ -1,0 +1,82 @@
+﻿NYC Road Traffic Volume Analysis Using Automated Sensor Data
+Course Name and Section:
+ Big Data Analytics – Section C (Saturday)
+Semester Term:
+ Fall 2025
+Student Names and Net IDs:
+Anushka Chetan Shah (as20340)
+Aishwarya Ghaiwat (arg9653)
+Bharath Mahesh Gera (bm3788)
+
+
+Project Abstract
+
+
+Urban roadways in New York City face extreme levels of vehicular traffic, particularly during peak hours and special events. Efficient traffic management remains a persistent challenge due to congestion, limited infrastructure capacity, and variable commuter behavior. This project proposes a comprehensive analysis of traffic volume using NYC’s Automated Traffic Volume Counts data collected by sensors installed on key roadways. By leveraging machine learning and data analytics, we aim to uncover patterns in traffic flow, identify peak congestion zones and times, and forecast future traffic trends. These insights will support infrastructure planning, congestion mitigation, and optimization of vehicular movement across the city.
+
+
+Problem Statement 
+
+
+Despite technological advancements, NYC’s road traffic continues to be hindered by delays, bottlenecks, and inefficient routing. Traffic congestion leads to increased pollution, lost productivity, and higher operational costs for logistics and emergency services. This project will focus on understanding temporal and spatial patterns of vehicular traffic, detecting anomalies, and providing actionable insights for city planners and commuters alike.
+
+
+
+
+
+
+
+
+Objectives:
+
+
+* Traffic Volume Analysis: Study and visualize daily and hourly traffic patterns across key city locations.
+* Peak Hour Identification: Determine high-traffic time windows and investigate weekday vs. weekend variances.
+* Congestion Prediction: Use supervised machine learning models to predict potential congestion based on historical trends.
+* Anomaly Detection: Identify unusual spikes or drops in traffic volume using statistical and unsupervised techniques.
+* Data-Driven Suggestions: Recommend traffic optimization strategies for reducing congestion during peak times.
+* Real-Time Monitoring: Integrate a small-scale real-time streaming pipeline to detect emerging congestion patterns.
+* Dashboard Creation: Visualize findings with React Dashboard or Tableau for stakeholder engagement.
+
+
+Data Source
+
+
+Dataset Name: NYC Automated Traffic Volume Counts
+
+
+Source Link: https://data.cityofnewyork.us/Transportation/Automated-Traffic-Volume-Counts/7ym2-wayt/about_data
+
+
+Data File Size: ~200 MB (compressed)
+
+
+Approximate Records: ~4 to 5 million entries depending on years selected
+
+
+Fields: Date, Time, Location, Borough, Direction, Count of vehicles per lane, Sensor ID
+
+
+
+
+Proposed Technologies & Programming Languages
+Technologies:
+
+
+Data Handling: Python, Pandas, NumPy
+
+
+Machine Learning: scikit-learn, XGBoost, Random Forest, Isolation Forest 
+
+
+Visualization: Matplotlib, Seaborn, Plotly, Tableau
+
+
+Big Data: PySpark, Dask
+
+
+Dashboarding: React Dashboard
+
+
+To efficiently handle large-scale aggregations on the multi-million–record dataset, this project will employ PySpark for distributed data processing beyond the capabilities of pandas. This framework enables parallel computation and out-of-core data handling, ensuring that complex transformations, group-by operations, and statistical aggregations are performed seamlessly across multiple cores or nodes. 
+Specifically, PySpark will leverage the Spark SQL and DataFrame APIs to execute distributed aggregations and window-based analyses, while Dask will support lazy execution and chunk-wise computations on machines with limited memory. The project will further utilize HDFS-based environment for scalable data storage and cluster orchestration, ensuring high availability and fault tolerance. Processed and intermediate datasets will be stored in Parquet format to optimize performance through columnar compression and efficient I/O operations. This approach ensures robust, scalable analytics suitable for real-time or large-batch traffic volume analysis across New York City’s extensive sensor network.
