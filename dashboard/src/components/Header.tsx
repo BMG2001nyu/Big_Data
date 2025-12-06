@@ -26,10 +26,10 @@ function Header({ connected, lastUpdated, boroughs, peakTraffic }: HeaderProps) 
           {connected ? 'Live' : 'Connecting'}
         </div>
         <div className="header-stat">
-          🌐 {boroughs} boroughs
+          {boroughs} boroughs
         </div>
         <div className="header-stat">
-          ⚡ Peak: {peakTraffic}
+          Peak: {peakTraffic}
         </div>
       </div>
     </div>

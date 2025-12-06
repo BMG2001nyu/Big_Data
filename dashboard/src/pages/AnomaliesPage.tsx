@@ -10,7 +10,7 @@ function AnomaliesPage({ anomalies, anomaliesLoading }: AnomaliesPageProps) {
   return (
     <>
       <div className="section-header">
-        <h2>⚠️ Traffic Anomalies</h2>
+        <h2>Traffic Anomalies</h2>
         <p>Unusual patterns and events requiring attention</p>
       </div>
 

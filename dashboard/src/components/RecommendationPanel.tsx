@@ -34,7 +34,6 @@ function RecommendationPanel({ recommendations, loading = false }: Recommendatio
           style={{ animation: `fadeInUp 0.5s ease-out ${index * 100}ms both` }}
         >
           <div className="recommendation-header">
-            <div className="recommendation-icon">📍</div>
             <div className="recommendation-priority">
               Priority {index + 1}
             </div>
