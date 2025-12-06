@@ -9,6 +9,7 @@ from typing import List
 import pandas as pd
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 
+from src.database.mongodb import get_database
 from src.recommendations.generator import RecommendationConfig, RecommendationGenerator
 
 PROCESSED_PATH = pathlib.Path("data/processed")
@@ -16,6 +17,18 @@ ANOMALY_PATH = pathlib.Path("data/anomalies/anomaly_events.parquet")
 STREAM_OUTPUT_PATH = pathlib.Path("data/stream/aggregates")
 
 app = FastAPI(title="NYC Traffic Analytics API")
+
+# Try to get MongoDB database, fallback to None if not available
+try:
+    db = get_database()
+    # Test connection
+    db.list_collection_names()
+    _mongodb_available = True
+    print("✅ MongoDB connected successfully!")
+except Exception as e:
+    db = None
+    _mongodb_available = False
+    print(f"⚠️  MongoDB not available, will use parquet files: {e}")
 
 
 def load_latest_parquet(path: pathlib.Path) -> pd.DataFrame:
@@ -33,6 +46,22 @@ def load_latest_parquet(path: pathlib.Path) -> pd.DataFrame:
 @app.get("/traffic/summary")
 @app.get("/api/traffic/summary", include_in_schema=False)
 def traffic_summary() -> List[dict]:
+    """Get traffic summary from MongoDB or fallback to parquet."""
+    if _mongodb_available and db is not None:
+        try:
+            collection = db["traffic_summary"]
+            # Get last 100 records sorted by date
+            cursor = collection.find().sort("date", -1).limit(100)
+            results = list(cursor)
+            # Convert ObjectId to string for JSON serialization
+            for doc in results:
+                doc.pop("_id", None)
+            return results
+        except Exception as exc:
+            # Fallback to parquet if MongoDB fails
+            pass
+    
+    # Fallback to parquet files
     try:
         df = load_latest_parquet(PROCESSED_PATH)
     except FileNotFoundError as exc:
@@ -53,6 +82,21 @@ def traffic_summary() -> List[dict]:
 @app.get("/traffic/anomalies")
 @app.get("/api/traffic/anomalies", include_in_schema=False)
 def traffic_anomalies(limit: int = 100) -> List[dict]:
+    """Get traffic anomalies from MongoDB or fallback to parquet."""
+    if _mongodb_available and db is not None:
+        try:
+            collection = db["anomalies"]
+            cursor = collection.find().sort("from_hour", -1).limit(limit)
+            results = list(cursor)
+            for doc in results:
+                doc.pop("_id", None)
+            if results:
+                return results
+        except Exception:
+            # Fallback to parquet if MongoDB fails or collection doesn't exist
+            pass
+    
+    # Fallback to parquet files
     try:
         df = load_latest_parquet(ANOMALY_PATH)
     except FileNotFoundError as exc:
@@ -78,6 +122,21 @@ def traffic_recommendations(top_k: int = 10) -> List[dict]:
 @app.get("/traffic/stream/aggregates")
 @app.get("/api/traffic/stream/aggregates", include_in_schema=False)
 def traffic_stream_aggregates(limit: int = 50) -> List[dict]:
+    """Get stream aggregates from MongoDB or fallback to parquet."""
+    if _mongodb_available and db is not None:
+        try:
+            collection = db["stream_aggregates"]
+            cursor = collection.find().sort("window_end", -1).limit(limit)
+            results = list(cursor)
+            for doc in results:
+                doc.pop("_id", None)
+            if results:
+                return results
+        except Exception:
+            # Fallback to parquet if MongoDB fails or collection doesn't exist
+            pass
+    
+    # Fallback to parquet files
     if not STREAM_OUTPUT_PATH.exists():
         return []
     parquet_files = list(STREAM_OUTPUT_PATH.glob("**/*.parquet"))
@@ -117,4 +176,14 @@ async def traffic_websocket(websocket: WebSocket) -> None:
 
 @app.get("/health")
 def health() -> dict:
-    return {"status": "ok"}
+    """Health check endpoint."""
+    status = {"status": "ok", "mongodb": "disconnected"}
+    if _mongodb_available and db is not None:
+        try:
+            # Test MongoDB connection
+            db.list_collection_names()
+            status["mongodb"] = "connected"
+            status["collections"] = db.list_collection_names()
+        except Exception:
+            status["mongodb"] = "error"
+    return status

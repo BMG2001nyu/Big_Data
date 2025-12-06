@@ -23,14 +23,6 @@ function LiveVisitors({ anomalies }: LiveVisitorsProps) {
 
   const visitorsByBorough = useMemo(() => {
     const boroughCounts: Record<string, number> = {};
-    const boroughEmojis: Record<string, string> = {
-      'MANHATTAN': '🗽',
-      'BROOKLYN': '🌉',
-      'QUEENS': '✈️',
-      'BRONX': '🏟️',
-      'STATEN ISLAND': '⛴️',
-    };
-
     anomalies.slice(0, 5).forEach((anomaly) => {
       boroughCounts[anomaly.borough] = (boroughCounts[anomaly.borough] || 0) + 1;
     });
@@ -39,7 +31,6 @@ function LiveVisitors({ anomalies }: LiveVisitorsProps) {
       .sort((a, b) => b[1] - a[1])
       .map(([borough, count]) => ({
         location: borough,
-        flag: boroughEmojis[borough] || '📍',
         count,
       }));
   }, [anomalies]);
@@ -65,7 +56,6 @@ function LiveVisitors({ anomalies }: LiveVisitorsProps) {
       <div className="visitors-list">
         {visitorsByBorough.map((visitor) => (
           <div key={visitor.location} className="visitor-item">
-            <div className="visitor-flag">{visitor.flag}</div>
             <div className="visitor-info">
               <div className="visitor-location">{visitor.location}</div>
             </div>
