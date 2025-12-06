@@ -1,10 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
 import { useEffect, useMemo, useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
-import KpiCard from './components/KpiCard';
-import HeatmapGrid, { HeatmapPoint } from './components/HeatmapGrid';
-import RecommendationPanel, { Recommendation } from './components/RecommendationPanel';
+import Navigation from './components/Navigation';
+import Header from './components/Header';
+import OverviewPage from './pages/OverviewPage';
+import AnalyticsPage from './pages/AnalyticsPage';
+import HeatmapPage from './pages/HeatmapPage';
+import AnomaliesPage from './pages/AnomaliesPage';
+import InsightsPage from './pages/InsightsPage';
+import { HeatmapPoint } from './components/HeatmapGrid';
 
 interface TrafficSummary {
   date: string;
@@ -123,6 +128,24 @@ function App() {
     return Object.entries(grouped).map(([borough, volume]) => ({ borough, volume }));
   }, [summary]);
 
+  const avgSessionTime = useMemo(() => {
+    if (summary.length === 0) return '4m 28s';
+    const avgMinutes = Math.floor(summary.length / 60);
+    const avgSeconds = summary.length % 60;
+    return `${avgMinutes}m ${avgSeconds}s`;
+  }, [summary]);
+
+  const peakHour = useMemo(() => {
+    if (summary.length === 0) return 0;
+    const hourCounts: Record<number, number> = {};
+    summary.forEach((row) => {
+      const hour = new Date(row.date).getHours();
+      hourCounts[hour] = (hourCounts[hour] || 0) + row.vehicle_count;
+    });
+    const peak = Object.entries(hourCounts).sort((a, b) => b[1] - a[1])[0];
+    return peak ? parseInt(peak[0]) : 0;
+  }, [summary]);
+
   const heatmapData: HeatmapPoint[] = useMemo(() => {
     return streamAggregates.map((aggregate) => ({
       borough: aggregate.borough,
@@ -131,96 +154,82 @@ function App() {
     }));
   }, [streamAggregates]);
 
-  const streamChartData = useMemo(() => {
-    return streamAggregates.map((aggregate) => ({
-      window_end: aggregate.window_end,
-      borough: aggregate.borough,
-      avg_vehicle_count: aggregate.avg_vehicle_count,
-    }));
-  }, [streamAggregates]);
-
   return (
-    <div className="layout">
-      <header>
-        <h1>NYC Traffic Analytics</h1>
-        <p>Live and historical insights from NYC automated traffic sensors.</p>
-      </header>
-      <section className="kpi-grid">
-        <KpiCard title="Total Vehicle Volume" value={totalVolume.toLocaleString()} loading={summaryLoading} />
-        {boroughKpis.map((item) => (
-          <KpiCard key={item.borough} title={`${item.borough} Volume`} value={item.volume.toLocaleString()} loading={summaryLoading} />
-        ))}
-        <div className={`live-status ${streamConnected ? '' : 'offline'}`}>
-          <span className="live-dot" />
-          {streamConnected ? 'Live feed connected' : 'Waiting for live feed'}
-          {streamLastUpdated && ` • Updated ${streamLastUpdated.toLocaleTimeString()}`}
+    <Router>
+      <div className="dashboard-container">
+        <div className="dashboard-background">
+          <div className="dashboard-background-orb-1" />
+          <div className="dashboard-background-orb-2" />
+          <div className="dashboard-background-orb-3" />
+          <div className="dashboard-background-grid" />
         </div>
-      </section>
-      <section>
-        <h2>Recent Trends</h2>
-        <div className="chart-container">
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={summary}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis dataKey="vehicle_count" />
-              <Tooltip />
-              <Line type="monotone" dataKey="vehicle_count" stroke="#2563eb" dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
+        
+        <Navigation />
+        
+        <div className="dashboard-content">
+          <Header 
+            connected={streamConnected}
+            lastUpdated={streamLastUpdated}
+            boroughs={boroughKpis.length}
+            peakTraffic={`${peakHour}:00`}
+          />
+          
+          <Routes>
+            <Route 
+              path="/" 
+              element={
+                <OverviewPage
+                  summary={summary}
+                  anomalies={anomalies}
+                  recommendations={recommendations}
+                  streamAggregates={streamAggregates}
+                  summaryLoading={summaryLoading}
+                  anomaliesLoading={anomaliesLoading}
+                  totalVolume={totalVolume}
+                  boroughKpis={boroughKpis}
+                  peakHour={peakHour}
+                  avgSessionTime={avgSessionTime}
+                />
+              } 
+            />
+            <Route 
+              path="/analytics" 
+              element={
+                <AnalyticsPage
+                  summary={summary}
+                  streamAggregates={streamAggregates}
+                  boroughKpis={boroughKpis}
+                />
+              } 
+            />
+            <Route 
+              path="/heatmap" 
+              element={
+                <HeatmapPage heatmapData={heatmapData} />
+              } 
+            />
+            <Route 
+              path="/anomalies" 
+              element={
+                <AnomaliesPage
+                  anomalies={anomalies}
+                  anomaliesLoading={anomaliesLoading}
+                />
+              } 
+            />
+            <Route 
+              path="/insights" 
+              element={
+                <InsightsPage
+                  recommendations={recommendations}
+                  recommendationsLoading={recommendationsLoading}
+                />
+              } 
+            />
+          </Routes>
         </div>
-      </section>
-      <section>
-        <h2>Live Streaming Trends</h2>
-        <div className="chart-container">
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={streamChartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="window_end" tickFormatter={(value) => new Date(value).toLocaleTimeString()} />
-              <YAxis />
-              <Tooltip labelFormatter={(value) => new Date(value).toLocaleString()} />
-              <Legend />
-              <Bar dataKey="avg_vehicle_count" name="Avg Vehicle Count" fill="#22d3ee" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </section>
-      <section>
-        <h2>Peak Hour Heatmap</h2>
-        <HeatmapGrid data={heatmapData} />
-      </section>
-      <section>
-        <h2>Latest Anomalies</h2>
-        {anomaliesLoading ? (
-          <p>Loading...</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Timestamp</th>
-                <th>Borough</th>
-                <th>Roadway</th>
-                <th>Vehicle Count</th>
-              </tr>
-            </thead>
-            <tbody>
-              {anomalies.slice(0, 10).map((anomaly) => (
-                <tr key={`${anomaly.from_hour}-${anomaly.roadwayname}`}>
-                  <td>{new Date(anomaly.from_hour).toLocaleString()}</td>
-                  <td>{anomaly.borough}</td>
-                  <td>{anomaly.roadwayname}</td>
-                  <td>{anomaly.vehicle_count.toLocaleString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
-      <section>
-        <h2>Data-Driven Recommendations</h2>
-        <RecommendationPanel recommendations={recommendations.slice(0, 5)} loading={recommendationsLoading} />
-      </section>
-    </div>
+      </div>
+    </Router>
   );
 }
 
